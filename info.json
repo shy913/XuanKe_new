@@ -1,0 +1,24 @@
+{
+    "new": true,
+    "Courses": [
+        {
+            "cid": "16583109",
+            "tid": "1001",
+            "selected": false
+        },
+        {
+            "cid": "01014125",
+            "tid": "1003",
+            "selected": false
+        }
+    ],
+    "cookie": {
+        "datetime": "2024-01-01T01:01:01.123456",
+        "value": "",
+        "auth": ""
+    },
+    "sleep_time": "5",
+    "wait_time": "1",
+    "id": "22123456",
+    "password": "Password123"
+}
