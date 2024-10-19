@@ -76,11 +76,11 @@ def list_clazz():
             'Cookie': Info["cookie"]["value"]
         }
         body = f'teachingClassType=ALLKC&pageNumber=1&pageSize=10&orderBy=&KCH={course['cid']}&JSH={course['tid']}'
-        response = requests.post('https://jwxk.shu.edu.cn/xsxk/elective/shu/clazz/list', headers=headers, data=body,
-                                 timeout=5).text
         try:
+            response = requests.post('https://jwxk.shu.edu.cn/xsxk/elective/shu/clazz/list', headers=headers, data=body,
+                                     timeout=5).text
             response = json.loads(response)
-            text = [['class name', response['data']['list']['rows'][0]['SKSJ'][0]['KCM']],
+            text = [['name', response['data']['list']['rows'][0]['SKSJ'][0]['KCM']],
                     ['cid', response['data']['list']['rows'][0]['SKSJ'][0]['KCH']],
                     ['tid', response['data']['list']['rows'][0]['SKSJ'][0]['KXH']],
                     ['selecting num', response['data']['list']['rows'][0]['YXRS']],
@@ -118,7 +118,7 @@ def get_remain(cid, tid):
                                  data=body,
                                  timeout=5).text
         response = json.loads(response)
-        text = [['class name', response['data']['list']['rows'][0]['SKSJ'][0]['KCM']],
+        text = [['name', response['data']['list']['rows'][0]['SKSJ'][0]['KCM']],
                 ['tid', response['data']['list']['rows'][0]['SKSJ'][0]['KXH']],
                 ['remain',
                  int(response['data']['list']['rows'][0]['KRL']) - int(response['data']['list']['rows'][0]['YXRS'])], ]
@@ -154,13 +154,14 @@ def xk2(cid, tid):
     # driver.find_element(By.XPATH,
     #                     "/html/body/div[3]/div/div[3]/button[2]").click()
 
-def xk3(cid,tid):
+
+def xk3(cid, tid):
     global Info
     '''
     use quick-add function
     '''
 
-    
+
 def xk(clazzId, secretVal):
     global Info
     secretVal = urllib.parse.quote(secretVal)
@@ -183,13 +184,17 @@ def xk(clazzId, secretVal):
         "Sec-Fetch-Mode": "cors",
         "Sec-Fetch-Site": "same-origin", }
     body = f"clazzType=XGKC&clazzId={clazzId}&secretVal={secretVal}"
-    response = requests.post(url, headers=headers, data=body, timeout=5).text
-
+    try:
+        response = requests.post(url, headers=headers, data=body, timeout=5).text
+    except Exception as e:
+        print("呃吼吼呜")
+        print(e)
+        return False
     if "成功" in response:
         print("嘿嘿嘿哈!!!")
         return True
     else:
-        print("呃吼呜呜")
+        print("呃吼吼呜")
         print(response)
         return False
 
@@ -256,7 +261,8 @@ def main():
                                     f.write(json.dumps(Info, indent=4))
                             # xk2(course['cid'],course['tid'])
                         time.sleep(int(Info["wait_time"]))
-                print(f"第{time_count}次循环已结束！\ntime:{datetime.strftime(datetime.now(),"%m月%d日%H:%M:%S")}\nerr_count:{err_count}\n")
+                print(
+                    f"第{time_count}次循环已结束！\ntime:{datetime.strftime(datetime.now(), "%m月%d日%H:%M:%S")}\nerr_count:{err_count}\n")
                 time_count += 1
                 time.sleep(int(Info["sleep_time"]))
 
@@ -268,15 +274,22 @@ if __name__ == '__main__':
     with open('info.json', 'r', encoding='utf-8') as f:
         Info = json.load(f)
     if Info["new"] is True:
-        agree = 'Y'
-        if input(f'输入{agree}以继续：') == agree:
+        agree = 'tongyi'
+        if input(f'Note:\n由于本项目造成的任何后果由您负责。\n请确保不会对计算机系统造成负担。\n你是否同意？\n输入{agree}以继续：') == agree:
             Info["new"] = False
+            Info["sleep_time"] = int(input("请输入刷新间隔(s)："))
+            Info["id"] = input("轻松输入学号：")
+            Info["password"] = input("请输入密码：")
             with open('info.json', 'w', encoding='utf-8') as f:
                 f.write(json.dumps(Info, indent=4))
             print('ok!')
         else:
             exit()
-    print("welcome!")
 
-    main()
+    print("welcome!")
+    try:
+        main()
+    except Exception as e:
+        print(e)
+        main()
     time.sleep(2200)
