@@ -16,7 +16,7 @@ By shy
 1. 确保电脑中有Chrome浏览器；
 2. 确保chromedriver.exe在当前目录下。若不在或报错，请前往[该网址](https://googlechromelabs.github.io/chrome-for-testing/#stable)下载对应您版本的chromedriver并将解压后的chromedriver.exe移动到目录下；
 3. 更改info.json中的账号密码以及蹲的课；
-4. 运行main.py，一开始可能需要更新cookie；
+4. 运行xk6.py，一开始可能需要更新cookie；
 5. 查看课程，确保正确；
 6. 输入[5]开始选课！
 7. 静待“嘿嘿嘿哈”的成功通知！
