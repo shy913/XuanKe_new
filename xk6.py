@@ -13,13 +13,6 @@ import urllib.parse
 VERSION = "6.0sb beta"
 
 
-def border(font):
-    if font == 2:
-        print("=================================")
-    elif font == 1:
-        print("—————————————————————————————————")
-
-
 def get_cookie():
     global Info
     print("正在更新cookie...")
@@ -161,7 +154,13 @@ def xk2(cid, tid):
     # driver.find_element(By.XPATH,
     #                     "/html/body/div[3]/div/div[3]/button[2]").click()
 
+def xk3(cid,tid):
+    global Info
+    '''
+    use quick-add function
+    '''
 
+    
 def xk(clazzId, secretVal):
     global Info
     secretVal = urllib.parse.quote(secretVal)
