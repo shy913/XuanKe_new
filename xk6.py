@@ -2,15 +2,15 @@ import json
 import tabulate
 from seleniumwire import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
+# from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.chrome.options import Options
 import requests
 import time
 from datetime import datetime, timedelta
 import urllib.parse
 
-VERSION = "6.0sb beta"
+VERSION = "6.0"
 
 
 def get_cookie():
@@ -25,6 +25,13 @@ def get_cookie():
     driver.find_element(By.XPATH, '/html/body/div/div[3]/div/div/form/div[1]/input').send_keys(Info['id'])
     driver.find_element(By.XPATH, '/html/body/div/div[3]/div/div/form/div[2]/input[2]').send_keys(Info['password'])
     driver.find_element(By.XPATH, '/html/body/div/div[3]/div/div/form/button').click()
+
+    ## select term
+    time.sleep(2)
+    driver.find_element(By.XPATH, '/html/body/div[1]/div[3]/div/div[2]/div[1]/table/tbody/tr[2]/td[1]/label/span[1]/span').click()
+    # //*[@id="xklc-dialog"]/div/div[2]/div[1]/table/tbody/tr[3]/td[1]/label/span[1]/span
+    driver.find_element(By.XPATH, '/html/body/div[1]/div[3]/div/div[2]/div[2]/span/button').click()
+    time.sleep(float(Info['wait_time']))
 
     driver.refresh()
     time.sleep(1)
@@ -47,7 +54,7 @@ def get_cookie():
         with open('info.json', 'w', encoding='utf-8') as f:
             f.write(json.dumps(t, indent=4))
         print("cookie写入成功")
-        time.sleep(int(Info['wait_time']))
+        time.sleep(float(Info["wait_time"]))
         with open('info.json', 'r', encoding='utf-8') as f:
             Info = json.load(f)
         print(Info["cookie"]["datetime"])
@@ -90,7 +97,7 @@ def list_clazz():
             print(tabulate.tabulate(text, tablefmt="fancy_grid"))
         except:
             print(f'{course}请求失败！')
-            print(f'返回信息：{response.__repr__()}')
+            # print(f'返回信息：{response.__repr__()}')
 
 
 def get_remain(cid, tid):
@@ -157,10 +164,36 @@ def xk2(cid, tid):
 
 def xk3(cid, tid):
     global Info
-    '''
-    use quick-add function
-    '''
-
+    url = "https://jwxk.shu.edu.cn/xsxk/elective/shu/clazz/quick-add"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/116.0",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Authorization": Info["cookie"]["auth"],
+        "batchId": "23d4bd1b8188422bbbba6606989b20b0",
+        "Origin": "https://jwxk.shu.edu.cn",
+        "Connection": "keep-alive",
+        "Referer": "https://jwxk.shu.edu.cn/xsxk/elective/grablessons?batchId=23d4bd1b8188422bbbba6606989b20b0",
+        "Cookie": Info["cookie"]["value"],
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin", }
+    body = f"1=%{cid}%2C{tid}"
+    try:
+        response = requests.post(url, headers=headers, data=body, timeout=5).text
+    except Exception as e:
+        print("呃吼吼呜")
+        print(e)
+        return False
+    if "成功" in response:
+        print("嘿嘿嘿哈!!!")
+        return True
+    else:
+        print("呃吼吼呜")
+        print(response)
+        return False
 
 def xk(clazzId, secretVal):
     global Info
@@ -209,12 +242,11 @@ def main():
     for i in range(len(items)):
         text.append([f"[{i + 1}]", items[i]])
     while True:
-        print(f"Made by shy\n"
-              f"选课小助手 {VERSION}")
+        print(f"选课小助手 {VERSION}")
 
         # cookie 时间查询
         current_time = datetime.now()
-        print(current_time.isoformat())
+        # print(current_time.isoformat())
         try:
             last_time = datetime.fromisoformat(Info["cookie"]["datetime"])
         except:
@@ -244,32 +276,45 @@ def main():
             err_count = 0
             time_count = 1
             while True:
-                if err_count > 5:
+                if err_count >= 5:
                     err_count = 0
                     get_cookie()
                 for i in range(len(Info["Courses"])):
                     course = Info["Courses"][i]
                     if course["selected"] is False:
-                        result = get_remain(course['cid'], course['tid'])
-                        if result[0] == -100:
-                            err_count += 1
-                        elif result[0] > 0:
-                            if xk(result[1], result[2]):
+                        if 1 == 1:
+                            result = get_remain(course['cid'], course['tid'])
+                            if result[0] == -100:
+                                err_count += 1
+                            elif result[0] > 0:
+                                # if xk(result[1], result[2]):
+                                if xk3(course['cid'],course['tid']):
+                                    print("选课成功！")
+                                    Info["Courses"][i]["selected"] = True
+                                    with open('info.json', 'w', encoding='utf-8') as f:
+                                        f.write(json.dumps(Info, indent=4))
+                            time.sleep(float(Info["wait_time"]))
+                        else:
+                            if xk3(course['cid'], course['tid']):
                                 print("选课成功！")
                                 Info["Courses"][i]["selected"] = True
                                 with open('info.json', 'w', encoding='utf-8') as f:
                                     f.write(json.dumps(Info, indent=4))
-                            # xk2(course['cid'],course['tid'])
-                        time.sleep(int(Info["wait_time"]))
+                            time.sleep(float(Info["wait_time"]))
+                    else:
+                        print(f"已跳过 {course['cid']}, {course['tid']}")
                 print(
-                    f"第{time_count}次循环已结束！\ntime:{datetime.strftime(datetime.now(), "%m月%d日%H:%M:%S")}\nerr_count:{err_count}\n")
+                    f"第{time_count}次循环已结束！\n"
+                    f"time:{datetime.strftime(datetime.now(), "%m月%d日%H:%M:%S")}\n"
+                    f"err_count:{err_count}\n")
                 time_count += 1
-                time.sleep(int(Info["sleep_time"]))
+                time.sleep(float(Info["sleep_time"]))
+
 
 
 if __name__ == '__main__':
     # initialize
-
+    print("Made by shy")
     # 判断新用户
     with open('info.json', 'r', encoding='utf-8') as f:
         Info = json.load(f)
@@ -278,7 +323,7 @@ if __name__ == '__main__':
         if input(f'Note:\n由于本项目造成的任何后果由您负责。\n请确保不会对计算机系统造成负担。\n你是否同意？\n输入{agree}以继续：') == agree:
             Info["new"] = False
             Info["sleep_time"] = int(input("请输入刷新间隔(s)："))
-            Info["id"] = input("轻松输入学号：")
+            Info["id"] = input("请输入学号：")
             Info["password"] = input("请输入密码：")
             with open('info.json', 'w', encoding='utf-8') as f:
                 f.write(json.dumps(Info, indent=4))
@@ -286,7 +331,7 @@ if __name__ == '__main__':
         else:
             exit()
 
-    print("welcome!")
+    # print("welcome!")
     try:
         main()
     except Exception as e:
