@@ -6,7 +6,7 @@ By shy
 本脚本提供了三种不同的选课方式，分别对应三个函数：
 - xk(clazzId, secretVal): 推荐，使用requests库直接发送请求，需要查询clazzId以及secretVal。其中secretVal错误可能会导致选课失败。
 - xk2(cid, tid): 不推荐，基于selenium直接模仿人工操作浏览器，但尚无法判断是否选课成功。
-- xk3(cid, tid): 开发中，基于快捷录入发送的请求，只需要教师号和课程号。
+- xk3(cid, tid): 基于快捷录入发送的请求，只需要教师号和课程号。
 
 
 ## 须知
