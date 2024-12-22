@@ -13,6 +13,7 @@ import urllib.parse
 
 VERSION = "6.1"
 
+
 def get_cookie():
     global Info
     print("正在更新cookie...")
@@ -28,7 +29,7 @@ def get_cookie():
     # 刷新以跳过等待时间
     time.sleep(1)
     driver.refresh()
-    time.sleep(2) # 一秒会报错
+    time.sleep(2)  # 一秒会报错
 
     # 如果index != 0，切换学期
     if Info['term_index'] != '0':
@@ -38,7 +39,8 @@ def get_cookie():
         # 选择学期， 按下位置 = 第一个按钮位置 + 偏移量，下为原始位置
         # driver.find_element(By.XPATH, '/html/body/div[2]/div/div[8]/div/div[2]/div[1]/table/tbody/tr[2]/td[1]/label/span[1]/span')
         shift = int(Info['term_index'])
-        driver.find_element(By.XPATH, f'/html/body/div[2]/div/div[8]/div/div[2]/div[1]/table/tbody/tr[{2 + shift}]/td[1]/label/span[1]/span').click()
+        driver.find_element(By.XPATH,
+                            f'/html/body/div[2]/div/div[8]/div/div[2]/div[1]/table/tbody/tr[{2 + shift}]/td[1]/label/span[1]/span').click()
 
         # 确认
         driver.find_element(By.XPATH, '/html/body/div[2]/div/div[8]/div/div[2]/div[2]/span/button[1]').click()
@@ -46,7 +48,6 @@ def get_cookie():
         # 更新batchid
         batch_id = driver.current_url.split('=')[-1]
         Info['batch_id'] = batch_id
-
 
     driver.refresh()
     time.sleep(1)
@@ -197,7 +198,7 @@ def xk3(cid, tid):
         "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
         "Sec-Fetch-Site": "same-origin", }
-    body = f"1=%{cid}%2C{tid}"
+    body = f"1={cid}%2C{tid}"
     try:
         response = requests.post(url, headers=headers, data=body, timeout=5).text
     except Exception as e:
@@ -211,6 +212,7 @@ def xk3(cid, tid):
         print("呃吼吼呜")
         print(response)
         return False
+
 
 def xk(clazzId, secretVal):
     global Info
@@ -248,6 +250,7 @@ def xk(clazzId, secretVal):
         print(response)
         return False
 
+
 def jiao():
     type = '1'
     if type == '1':
@@ -258,6 +261,8 @@ def jiao():
         winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
     if type == "0":
         """额"""
+
+
 def main():
     global Info
 
@@ -308,12 +313,12 @@ def main():
                 for i in range(len(Info["Courses"])):
                     course = Info["Courses"][i]
                     if course["selected"] is False:
-                        if True: # False: 忽略剩余人数限制
+                        if True:  # False: 忽略剩余人数限制
                             result = get_remain(course['cid'], course['tid'])
                             if result[0] == -100:
                                 err_count += 1
                             elif result[0] > 0:
-                                if xk(result[1], result[2]):
+                                if xk(result[1], result[2]): # 下面可以修改使用的选课函数
                                 # if xk3(course['cid'],course['tid']):
                                     print("选课成功！")
                                     Info["Courses"][i]["selected"] = True
@@ -338,7 +343,6 @@ def main():
                 time.sleep(float(Info["sleep_time"]))
 
 
-
 if __name__ == '__main__':
     jiao()
     # initialize
@@ -349,7 +353,8 @@ if __name__ == '__main__':
     batch_id = Info["batch_id"]
     if Info["new"] is True:
         agree = 'tongyi'
-        if input(f'Note:\n由于本项目造成的任何后果由您负责。\n请确保不会对计算机系统造成负担。\n你是否同意？\n输入{agree}以继续：') == agree:
+        if input(
+                f'Note:\n由于本项目造成的任何后果由您负责。\n请确保不会对计算机系统造成负担。\n你是否同意？\n输入{agree}以继续：') == agree:
             Info["new"] = False
             Info["sleep_time"] = int(input("请输入刷新间隔(s)："))
             Info["id"] = input("请输入学号：")
