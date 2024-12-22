@@ -1,5 +1,6 @@
 import json
 import tabulate
+import winsound
 from seleniumwire import webdriver
 from selenium.webdriver.common.by import By
 # from selenium.webdriver.common.keys import Keys
@@ -10,8 +11,7 @@ import time
 from datetime import datetime, timedelta
 import urllib.parse
 
-VERSION = "6.0"
-
+VERSION = "6.1"
 
 def get_cookie():
     global Info
@@ -21,17 +21,32 @@ def get_cookie():
     driver.set_window_size(1920, 1080)
     driver.minimize_window()
     driver.get("http://jwxk.shu.edu.cn/")
-    driver.minimize_window()
     driver.find_element(By.XPATH, '/html/body/div/div[3]/div/div/form/div[1]/input').send_keys(Info['id'])
     driver.find_element(By.XPATH, '/html/body/div/div[3]/div/div/form/div[2]/input[2]').send_keys(Info['password'])
     driver.find_element(By.XPATH, '/html/body/div/div[3]/div/div/form/button').click()
 
-    ## select term
-    time.sleep(2)
-    driver.find_element(By.XPATH, '/html/body/div[1]/div[3]/div/div[2]/div[1]/table/tbody/tr[2]/td[1]/label/span[1]/span').click()
-    # //*[@id="xklc-dialog"]/div/div[2]/div[1]/table/tbody/tr[3]/td[1]/label/span[1]/span
-    driver.find_element(By.XPATH, '/html/body/div[1]/div[3]/div/div[2]/div[2]/span/button').click()
-    time.sleep(float(Info['wait_time']))
+    # 刷新以跳过等待时间
+    time.sleep(1)
+    driver.refresh()
+    time.sleep(2) # 一秒会报错
+
+    # 如果index != 0，切换学期
+    if Info['term_index'] != '0':
+        # "切换"
+        driver.find_element(By.XPATH, '/html/body/div[2]/div/div[1]/a[2]/span/a').click()
+
+        # 选择学期， 按下位置 = 第一个按钮位置 + 偏移量，下为原始位置
+        # driver.find_element(By.XPATH, '/html/body/div[2]/div/div[8]/div/div[2]/div[1]/table/tbody/tr[2]/td[1]/label/span[1]/span')
+        shift = int(Info['term_index'])
+        driver.find_element(By.XPATH, f'/html/body/div[2]/div/div[8]/div/div[2]/div[1]/table/tbody/tr[{2 + shift}]/td[1]/label/span[1]/span').click()
+
+        # 确认
+        driver.find_element(By.XPATH, '/html/body/div[2]/div/div[8]/div/div[2]/div[2]/span/button[1]').click()
+
+        # 更新batchid
+        batch_id = driver.current_url.split('=')[-1]
+        Info['batch_id'] = batch_id
+
 
     driver.refresh()
     time.sleep(1)
@@ -48,6 +63,7 @@ def get_cookie():
     else:
         with open('info.json', 'r', encoding='utf-8') as f:
             t = json.load(f)
+        t['batch_id'] = Info['batch_id']
         t["cookie"]["value"] = coo
         t["cookie"]["auth"] = coo[54:]
         t["cookie"]["datetime"] = datetime.now().isoformat()
@@ -65,12 +81,13 @@ def list_clazz():
     global Info
     with open('info.json', 'r', encoding='utf-8') as f:
         Info = json.load(f)
+    # print(Info)
     for course in Info['Courses']:
         headers = {
             "accept": "application/json, text/plain, */*",
             "accept-language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
             "authorization": Info["cookie"]["auth"],
-            "batchid": "23d4bd1b8188422bbbba6606989b20b0",
+            "batchid": batch_id,
             "cache-control": "no-cache",
             "content-type": "application/x-www-form-urlencoded",
             "pragma": "no-cache",
@@ -97,7 +114,7 @@ def list_clazz():
             print(tabulate.tabulate(text, tablefmt="fancy_grid"))
         except:
             print(f'{course}请求失败！')
-            # print(f'返回信息：{response.__repr__()}')
+            # print(f'返回信息：{response.__repr__()[:20]}......')
 
 
 def get_remain(cid, tid):
@@ -106,7 +123,7 @@ def get_remain(cid, tid):
         "accept": "application/json, text/plain, */*",
         "accept-language": "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6",
         "authorization": Info["cookie"]["auth"],
-        "batchid": "23d4bd1b8188422bbbba6606989b20b0",
+        "batchid": batch_id,
         "cache-control": "no-cache",
         "content-type": "application/x-www-form-urlencoded",
         "pragma": "no-cache",
@@ -172,10 +189,10 @@ def xk3(cid, tid):
         "Accept-Encoding": "gzip, deflate, br",
         "Content-Type": "application/x-www-form-urlencoded",
         "Authorization": Info["cookie"]["auth"],
-        "batchId": "23d4bd1b8188422bbbba6606989b20b0",
+        "batchId": batch_id,
         "Origin": "https://jwxk.shu.edu.cn",
         "Connection": "keep-alive",
-        "Referer": "https://jwxk.shu.edu.cn/xsxk/elective/grablessons?batchId=23d4bd1b8188422bbbba6606989b20b0",
+        "Referer": f"https://jwxk.shu.edu.cn/xsxk/elective/grablessons?batchId={batch_id}",
         "Cookie": Info["cookie"]["value"],
         "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
@@ -208,10 +225,10 @@ def xk(clazzId, secretVal):
         "Accept-Encoding": "gzip, deflate, br",
         "Content-Type": "application/x-www-form-urlencoded",
         "Authorization": Info["cookie"]["auth"],
-        "batchId": "23d4bd1b8188422bbbba6606989b20b0",
+        "batchId": batch_id,
         "Origin": "https://jwxk.shu.edu.cn",
         "Connection": "keep-alive",
-        "Referer": "https://jwxk.shu.edu.cn/xsxk/elective/grablessons?batchId=23d4bd1b8188422bbbba6606989b20b0",
+        "Referer": f"https://jwxk.shu.edu.cn/xsxk/elective/grablessons?batchId={batch_id}",
         "Cookie": Info["cookie"]["value"],
         "Sec-Fetch-Dest": "empty",
         "Sec-Fetch-Mode": "cors",
@@ -231,7 +248,16 @@ def xk(clazzId, secretVal):
         print(response)
         return False
 
-
+def jiao():
+    type = '1'
+    if type == '1':
+        winsound.MessageBeep(winsound.MB_ICONHAND)
+    if type == '2':
+        winsound.MessageBeep(winsound.MB_OK)
+    if type == '3':
+        winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
+    if type == "0":
+        """额"""
 def main():
     global Info
 
@@ -282,17 +308,18 @@ def main():
                 for i in range(len(Info["Courses"])):
                     course = Info["Courses"][i]
                     if course["selected"] is False:
-                        if 1 == 1:
+                        if True: # False: 忽略剩余人数限制
                             result = get_remain(course['cid'], course['tid'])
                             if result[0] == -100:
                                 err_count += 1
                             elif result[0] > 0:
-                                # if xk(result[1], result[2]):
-                                if xk3(course['cid'],course['tid']):
+                                if xk(result[1], result[2]):
+                                # if xk3(course['cid'],course['tid']):
                                     print("选课成功！")
                                     Info["Courses"][i]["selected"] = True
                                     with open('info.json', 'w', encoding='utf-8') as f:
                                         f.write(json.dumps(Info, indent=4))
+                                jiao()
                             time.sleep(float(Info["wait_time"]))
                         else:
                             if xk3(course['cid'], course['tid']):
@@ -313,11 +340,13 @@ def main():
 
 
 if __name__ == '__main__':
+    jiao()
     # initialize
     print("Made by shy")
     # 判断新用户
     with open('info.json', 'r', encoding='utf-8') as f:
         Info = json.load(f)
+    batch_id = Info["batch_id"]
     if Info["new"] is True:
         agree = 'tongyi'
         if input(f'Note:\n由于本项目造成的任何后果由您负责。\n请确保不会对计算机系统造成负担。\n你是否同意？\n输入{agree}以继续：') == agree:
