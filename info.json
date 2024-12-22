@@ -1,5 +1,7 @@
 {
     "new": true,
+    "term_index": "1",
+    "batch_id": "95c081debdfe487b809679399301b7c6",
     "Courses": [
         {
             "cid": "16583109",
