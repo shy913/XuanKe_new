@@ -13,7 +13,7 @@ By shy
 - 支持对多节课的蹲课；
 - cookie过期或在其他地方登录时自动更新cookie。
 ## 环境配置
-python 3.12环境下，控制台输入
+python 3.12（推荐）环境下，控制台输入
 `
 pip install requirements.txt
 `
@@ -31,10 +31,10 @@ pip install requirements.txt
   "id": 学号,
   "password": 密码
 ```
-5. 运行xk6.py，一开始可能需要更新cookie；
-6. 查看课程，确保正确；
-7. 输入[5]开始选课！
-8. 静待“嘿嘿嘿哈”的成功通知！
+4. 运行xk6.py，一开始可能需要更新cookie；
+5. 查看课程，确保正确；
+6. 输入[5]开始选课！
+7. 静待“嘿嘿嘿哈”的成功通知！
 
 ## 须知
 ### 1.	合法合规使用
