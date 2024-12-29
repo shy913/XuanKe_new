@@ -3,9 +3,7 @@ import tabulate
 import winsound
 from seleniumwire import webdriver
 from selenium.webdriver.common.by import By
-# from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
-# from selenium.webdriver.chrome.options import Options
 import requests
 import time
 from datetime import datetime, timedelta
@@ -252,7 +250,7 @@ def xk(clazzId, secretVal):
 
 
 def jiao():
-    type = '1'
+    type = '0'
     if type == '1':
         winsound.MessageBeep(winsound.MB_ICONHAND)
     if type == '2':
@@ -260,7 +258,7 @@ def jiao():
     if type == '3':
         winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
     if type == "0":
-        """额"""
+        """可以在有空位时叫一声"""
 
 
 def main():
